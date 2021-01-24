@@ -13,4 +13,4 @@ lint:
 gendiff:
 	poetry run gendiff
 
-.PHONY: all test clean
+.PHONY: gendiff gendiff
