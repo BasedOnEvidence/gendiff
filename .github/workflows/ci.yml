@@ -1,52 +1,56 @@
-##########################################################################
-# String for commit because of dolbaebskaya sistema                      #
-##########################################################################
-name: build
+name: Pytest CI
+
 on:
-  push:
-    branches:
-      - master
-    tags:
-      - '!*' # Do not execute on tags
-    paths:
-      - src/*
-      - test/*
-      - '*.json'
-      - yarn.lock
-  pull_request:
-    paths:
-      - '!*.MD'
+  - push
+  - pull_request
+
 jobs:
   test:
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [ ubuntu-latest, macOS-latest ]
-        node: [ '12', '10' ]
-    name: test/node ${{ matrix.node }}/${{ matrix.platform }}
-    runs-on: ${{ matrix.platform }}
+        # we want to test our package on several versions of Python
+        python-version: [3.8]
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: ${{ matrix.node }}
-    - run: npm install -g yarn
-    - run: yarn install
-    - run: yarn build
-    - run: yarn test
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+        # make depends on poetry
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          make install
+      - name: Run tests
+        run: |
+          make test
   coverage:
     needs: [ test ]
     name: coverage
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # we want to test our package on several versions of Python
+        python-version: [ 3.8 ]
     steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: '12'
-    - run: npm install -g yarn
-    - run: yarn install
-    - run: yarn build
-    - uses: paambaati/codeclimate-action@v2.2.4
-      env:
-        CC_TEST_REPORTER_ID: a111b80e6401182b982eeec6482d902139ffe5ee8dd38e6c2678d9f111e71b3f
-      with:
-        coverageCommand: yarn coverage
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+        # make depends on poetry
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          make install
+      - name: Run coverage
+        run: |
+          poetry run coverage run -m pytest gendiff
+          poetry run coverage xml
+      - uses: paambaati/codeclimate-action@v2.7.4
+        env:
+          CC_TEST_REPORTER_ID: a111b80e6401182b982eeec6482d902139ffe5ee8dd38e6c2678d9f111e71b3f
+        with:
+          coverageLocations: ${{github.workspace}}/coverage.xml:coverage.py
+          debug: true
