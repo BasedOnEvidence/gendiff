@@ -1,49 +1,30 @@
-name: build
+name: PythonCI
+
 on:
   push:
-    branches:
-      - master
-    tags:
-      - '!*' # Do not execute on tags
-    paths:
-      - src/*
-      - test/*
-      - '*.json'
-      - yarn.lock
+    branches: [ main ]
   pull_request:
-    paths:
-      - '!*.MD'
+    branches: [ main ]
+
 jobs:
-  test:
-    strategy:
-      matrix:
-        platform: [ ubuntu-latest, macOS-latest ]
-        node: [ '12', '10' ]
-    name: test/node ${{ matrix.node }}/${{ matrix.platform }}
-    runs-on: ${{ matrix.platform }}
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: ${{ matrix.node }}
-    - run: npm install -g yarn
-    - run: yarn install
-    - run: yarn build
-    - run: yarn test
-  coverage:
-    needs: [ test ]
-    name: coverage
+  linter: 
     runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - uses: actions/setup-node@master
-      with:
-        node-version: '12'
-    - run: npm install -g yarn
-    - run: yarn install
-    - run: yarn build
-    - uses: paambaati/codeclimate-action@v2.2.4
-      env:
-        CC_TEST_REPORTER_ID: a111b80e6401182b982eeec6482d902139ffe5ee8dd38e6c2678d9f111e71b3f
-      with:
-        coverageCommand: yarn coverage
+    
+    steps:      
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.6
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+      - name: install poetry
+        run: pip install poetry
+      - name: install dependency
+        run: make install  
+      - name: lint
+        run: make lint
+      - name: code coverage
+        uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: a111b80e6401182b982eeec6482d902139ffe5ee8dd38e6c2678d9f111e71b3f
+        with:
+          coverageCommand: make coverage
