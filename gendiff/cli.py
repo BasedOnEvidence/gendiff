@@ -1,7 +1,7 @@
 import argparse
 
 
-def user_req_init():
+def get_args_parser():
     parser = argparse.ArgumentParser(description="Generate diff")
     parser.add_argument("first_file")
     parser.add_argument("second_file")

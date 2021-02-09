@@ -1,19 +1,43 @@
 import json
 
 
-def gen_str(current_file, keys, status=" "):
-    s = ""
-    for key in keys:
-        s += "  {} {}: {}\n".format(status, key, current_file[key])
+def gen_dict(current_file, keys):
+    dict_ = {}
+    for key in current_file:
+        if key in keys:
+            dict_[key] = current_file[key]
+    return dict_
+
+
+def gen_tuple_dict(first_file, second_file, keys):
+    dict_ = {}
+    for key in first_file:
+        if key in keys:
+            dict_[key] = (first_file[key], second_file[key])
+    return dict_
+
+
+def gen_str(current_dict, status=" "):
+    s = []
+    for key in current_dict:
+        s.append("  {} {}: {}".format(status, key, current_dict[key]))
     return s
 
 
-def get_keys_status(first_file, second_file):
-    first_file_keys = set(first_file.keys())
-    second_file_keys = set(second_file.keys())
+def gen_str_with_diff(current_dict):
+    s = []
+    for key in current_dict:
+        s.append("  {} {}: {}".format("-", key, current_dict[key][0]))
+        s.append("  {} {}: {}".format("+", key, current_dict[key][1]))
+    return s
+
+
+def get_diff_keys(first_file, second_file):
+    first_file_keys = first_file.keys()  # set(first_file.keys())
+    second_file_keys = second_file.keys()  # set(second_file.keys())
     added_keys = second_file_keys - first_file_keys
     removed_keys = first_file_keys - second_file_keys
-    shared_keys = first_file_keys.intersection(second_file_keys)
+    shared_keys = first_file_keys & second_file_keys
     same_keys = set()
     different_keys = set()
     for key in shared_keys:
@@ -28,13 +52,19 @@ def generate_diff(file_path1, file_path2):
     first_file = json.load(open(file_path1))
     second_file = json.load(open(file_path2))
     removed_keys, same_keys, different_keys, added_keys = (
-        get_keys_status(first_file, second_file)
+        get_diff_keys(first_file, second_file)
     )
-    diff = "{\n"
-    diff += gen_str(first_file, removed_keys, "-")
-    diff += gen_str(first_file, same_keys)
-    diff += gen_str(first_file, different_keys, "-")
-    diff += gen_str(second_file, different_keys, "+")
-    diff += gen_str(second_file, added_keys, "+")
-    diff += "}"
-    return diff
+    dict_of_removed_keys = gen_dict(first_file, removed_keys)
+    dict_of_same_keys = gen_dict(first_file, same_keys)
+    dict_of_different_keys = (
+        gen_tuple_dict(first_file, second_file, different_keys)
+    )
+    dict_of_added_keys = gen_dict(second_file, added_keys)
+    diff = []
+    diff.append("{")
+    diff.extend(gen_str(dict_of_removed_keys, "-"))
+    diff.extend(gen_str(dict_of_same_keys))
+    diff.extend(gen_str_with_diff(dict_of_different_keys))
+    diff.extend(gen_str(dict_of_added_keys, "+"))
+    diff.append("}")
+    return "\n".join(diff)
