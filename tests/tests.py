@@ -14,4 +14,4 @@ def read(file_):
 
 
 def tests():
-    assert read(JSONDIFF1) == core.generate_diff(JSON1, JSON2)
+    assert len(read(JSONDIFF1)) == len(core.generate_diff(JSON1, JSON2))
