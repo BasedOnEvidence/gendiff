@@ -1,4 +1,6 @@
 import json
+import yaml
+import os
 
 
 def gen_dict(current_file, keys):
@@ -48,9 +50,21 @@ def get_diff_keys(first_file, second_file):
     return removed_keys, same_keys, different_keys, added_keys
 
 
+def load_file(file_path):
+    with open(file_path, 'r') as file_:
+        if os.path.splitext(file_path)[1] == ".json":
+            file_ = json.load(file_)
+        elif os.path.splitext(file_path)[1] == ".yml":
+            file_ = yaml.safe_load(file_)
+        else:
+            print("Plese add .yml or .json to {}".format(file_path))
+            file_ = {}
+    return file_
+
+
 def generate_diff(file_path1, file_path2):
-    first_file = json.load(open(file_path1))
-    second_file = json.load(open(file_path2))
+    first_file = load_file(file_path1)
+    second_file = load_file(file_path2)
     removed_keys, same_keys, different_keys, added_keys = (
         get_diff_keys(first_file, second_file)
     )
