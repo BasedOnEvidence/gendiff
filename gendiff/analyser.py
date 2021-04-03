@@ -8,8 +8,10 @@ def gen_dict(current_dict, keys, status):
     res_dict = {}
     for key in current_dict:
         if key in keys:
-            res_dict[key] = current_dict[key]
-            res_dict[key].append(status)
+            if current_dict[key] == ["KEY"]:
+                res_dict[key] = ["KEY", status]
+            else:
+                res_dict[key] = ["VALUE", current_dict[key], status]
     return res_dict
 
 
@@ -17,7 +19,9 @@ def gen_tuple_dict(first_file, second_file, keys, status):
     res_dict = {}
     for key in first_file:
         if key in keys:
-            res_dict[key] = [(first_file[key], second_file[key]), status]
+            res_dict[key] = [
+                "VALUE", (first_file[key], second_file[key]), status
+            ]
     return res_dict
 
 
@@ -57,8 +61,7 @@ def gen_depth_dict(src_dict, res_dict={}, path=''):
                 src_dict[elem_key], res_dict, os.path.join(path, elem_key)
             )
         else:
-            res_dict[os.path.join(path, elem_key) + '/'] = ["VALUE",
-                                                            src_dict[elem_key]]
+            res_dict[os.path.join(path, elem_key) + '/'] = src_dict[elem_key]
     return res_dict
 
 
@@ -81,4 +84,5 @@ def generate_diff(file_path1, file_path2):
     result_dict.update(dict_of_same_keys)
     result_dict.update(dict_of_different_keys)
     result_dict.update(dict_of_added_keys)
+    # print(json.dumps(result_dict, sort_keys=True, indent=4))
     return result_dict
