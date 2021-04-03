@@ -63,18 +63,31 @@ def load_file(file_path):
     return file_
 
 
+def gen_depth_dict(src_dict, res_dict={}, path="/"):
+    for elem_key in src_dict:
+        if type(src_dict[elem_key]) == dict:
+            gen_depth_dict(
+                src_dict[elem_key], res_dict, os.path.join(path, elem_key)
+            )
+        else:
+            res_dict[os.path.join(path, elem_key)] = src_dict[elem_key]
+    return res_dict
+
+
 def generate_diff(file_path1, file_path2):
-    first_file = load_file(file_path1)
-    second_file = load_file(file_path2)
+    first_data = load_file(file_path1)
+    second_data = load_file(file_path2)
+    first_dict = gen_depth_dict(first_data, {})
+    second_dict = gen_depth_dict(second_data, {})
     removed_keys, same_keys, different_keys, added_keys = (
-        get_diff_keys(first_file, second_file)
+        get_diff_keys(first_dict, second_dict)
     )
-    dict_of_removed_keys = gen_dict(first_file, removed_keys)
-    dict_of_same_keys = gen_dict(first_file, same_keys)
+    dict_of_removed_keys = gen_dict(first_dict, removed_keys)
+    dict_of_same_keys = gen_dict(first_dict, same_keys)
     dict_of_different_keys = (
-        gen_tuple_dict(first_file, second_file, different_keys)
+        gen_tuple_dict(first_dict, second_dict, different_keys)
     )
-    dict_of_added_keys = gen_dict(second_file, added_keys)
+    dict_of_added_keys = gen_dict(second_dict, added_keys)
     diff = []
     diff.append("{")
     diff.extend(gen_str(dict_of_removed_keys, "-"))
