@@ -4,35 +4,21 @@ import os
 import yaml
 
 
-def gen_dict(current_file, keys):
-    dict_ = {}
-    for key in current_file:
+def gen_dict(current_dict, keys, status):
+    res_dict = {}
+    for key in current_dict:
         if key in keys:
-            dict_[key] = current_file[key]
-    return dict_
+            res_dict[key] = current_dict[key]
+            res_dict[key].append(status)
+    return res_dict
 
 
-def gen_tuple_dict(first_file, second_file, keys):
-    dict_ = {}
+def gen_tuple_dict(first_file, second_file, keys, status):
+    res_dict = {}
     for key in first_file:
         if key in keys:
-            dict_[key] = (first_file[key], second_file[key])
-    return dict_
-
-
-def gen_str(current_dict, status=" "):
-    s = []
-    for key in current_dict:
-        s.append("  {} {}: {}".format(status, key, current_dict[key]))
-    return s
-
-
-def gen_str_with_diff(current_dict):
-    s = []
-    for key in current_dict:
-        s.append("  {} {}: {}".format("-", key, current_dict[key][0]))
-        s.append("  {} {}: {}".format("+", key, current_dict[key][1]))
-    return s
+            res_dict[key] = [(first_file[key], second_file[key]), status]
+    return res_dict
 
 
 def get_diff_keys(first_file, second_file):
@@ -63,14 +49,16 @@ def load_file(file_path):
     return file_
 
 
-def gen_depth_dict(src_dict, res_dict={}, path="/"):
+def gen_depth_dict(src_dict, res_dict={}, path=''):
     for elem_key in src_dict:
         if type(src_dict[elem_key]) == dict:
+            res_dict[os.path.join(path, elem_key) + '/'] = ["KEY"]
             gen_depth_dict(
                 src_dict[elem_key], res_dict, os.path.join(path, elem_key)
             )
         else:
-            res_dict[os.path.join(path, elem_key)] = src_dict[elem_key]
+            res_dict[os.path.join(path, elem_key) + '/'] = ["VALUE",
+                                                            src_dict[elem_key]]
     return res_dict
 
 
@@ -82,17 +70,15 @@ def generate_diff(file_path1, file_path2):
     removed_keys, same_keys, different_keys, added_keys = (
         get_diff_keys(first_dict, second_dict)
     )
-    dict_of_removed_keys = gen_dict(first_dict, removed_keys)
-    dict_of_same_keys = gen_dict(first_dict, same_keys)
+    dict_of_removed_keys = gen_dict(first_dict, removed_keys, "REMOVED")
+    dict_of_same_keys = gen_dict(first_dict, same_keys, "SAME")
     dict_of_different_keys = (
-        gen_tuple_dict(first_dict, second_dict, different_keys)
+        gen_tuple_dict(first_dict, second_dict, different_keys, "CHANGED")
     )
-    dict_of_added_keys = gen_dict(second_dict, added_keys)
-    diff = []
-    diff.append("{")
-    diff.extend(gen_str(dict_of_removed_keys, "-"))
-    diff.extend(gen_str(dict_of_same_keys))
-    diff.extend(gen_str_with_diff(dict_of_different_keys))
-    diff.extend(gen_str(dict_of_added_keys, "+"))
-    diff.append("}")
-    return "\n".join(diff)
+    dict_of_added_keys = gen_dict(second_dict, added_keys, "ADDED")
+    result_dict = {}
+    result_dict.update(dict_of_removed_keys)
+    result_dict.update(dict_of_same_keys)
+    result_dict.update(dict_of_different_keys)
+    result_dict.update(dict_of_added_keys)
+    return result_dict
