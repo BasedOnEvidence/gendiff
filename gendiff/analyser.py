@@ -70,7 +70,7 @@ def get_diff_on_next_layer(layer_diff, key, data1, data2, last_status=""):
         next_layer_diff = get_diff_on_current_layer(data1, data2)
         layer_diff.append(
             {"key": key,
-             "status": "UNKNOWN",
+             "status": "NESTED",
              "value": next_layer_diff}
         )
     else:
