@@ -1,4 +1,3 @@
-import json
 import os
 
 
@@ -30,7 +29,8 @@ def fill_template(container, src_dict, path=''):
 
 
 def make_stylish(diff):
-    container = build_nested(diff.keys())
-    fill_template(container, diff)
-    print(json.dumps(container, sort_keys=True, indent=4))
+    pass
+    # container = build_nested(diff.keys())
+    # fill_template(container, diff)
+    # print(json.dumps(container, sort_keys=True, indent=4))
     # print(json.dumps(res_dict, sort_keys=True, indent=4))

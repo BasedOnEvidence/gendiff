@@ -65,24 +65,49 @@ def gen_depth_dict(src_dict, res_dict={}, path=''):
     return res_dict
 
 
+def get_diff_on_next_layer(layer_diff, key, data1, data2, last_status=""):
+    if type(data1) == dict and type(data2) == dict:
+        next_layer_diff = get_diff_on_current_layer(data1, data2)
+        layer_diff.append(
+            {"key": key,
+             "status": "UNKNOWN",
+             "value": next_layer_diff}
+        )
+    else:
+        if data1 == data2:
+            layer_diff.append(
+                {"key": key,
+                 "status": "SAME",
+                 "value": data2}
+            )
+        # Если сравнивать словарь-значение, то все равно changed
+        if data1 == data2:
+            layer_diff.append(
+                {"key": key,
+                 "status": "CHANGED",
+                 "value": (data1, data2)}
+            )
+
+
+def get_diff_on_current_layer(data1, data2):
+    added_keys = data2.keys() - data1.keys()
+    removed_keys = data1.keys() - data2.keys()
+    shared_keys = data1.keys() & data2.keys()
+    diff = []
+    for key in shared_keys:
+        get_diff_on_next_layer(diff, key, data1[key], data2[key])
+    # Если ключ не общий, то на уровнях ниже разницы не существует
+    for key in added_keys:
+        diff.append({"key": key, "status": "ADDED", "value": data2[key]})
+    for key in removed_keys:
+        diff.append({"key": key, "status": "REMOVED", "value": data1[key]})
+    return diff
+
+
 def generate_diff(file_path1, file_path2):
     first_data = load_file(file_path1)
     second_data = load_file(file_path2)
-    first_dict = gen_depth_dict(first_data, {})
-    second_dict = gen_depth_dict(second_data, {})
-    removed_keys, same_keys, different_keys, added_keys = (
-        get_diff_keys(first_dict, second_dict)
-    )
-    dict_of_removed_keys = gen_dict(first_dict, removed_keys, "REMOVED")
-    dict_of_same_keys = gen_dict(first_dict, same_keys, "SAME")
-    dict_of_different_keys = (
-        gen_tuple_dict(first_dict, second_dict, different_keys, "CHANGED")
-    )
-    dict_of_added_keys = gen_dict(second_dict, added_keys, "ADDED")
-    result_dict = {}
-    result_dict.update(dict_of_removed_keys)
-    result_dict.update(dict_of_same_keys)
-    result_dict.update(dict_of_different_keys)
-    result_dict.update(dict_of_added_keys)
-    # print(json.dumps(result_dict, sort_keys=True, indent=4))
-    return result_dict
+    diff = get_diff_on_current_layer(first_data, second_data)
+    # print(diff)
+    print(json.dumps(diff, sort_keys=True, indent=4))
+    return diff
