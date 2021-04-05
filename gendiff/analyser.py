@@ -81,7 +81,7 @@ def get_diff_on_next_layer(layer_diff, key, data1, data2, last_status=""):
                  "value": data2}
             )
         # Если сравнивать словарь-значение, то все равно changed
-        if data1 == data2:
+        if data1 != data2:
             layer_diff.append(
                 {"key": key,
                  "status": "CHANGED",
