@@ -1,4 +1,7 @@
 import os
+from gendiff.analyser import ADDED, CHANGED, REMOVED, NESTED
+
+INDENT_MUL = ' ' * 4
 
 
 def build_nested_helper(path, text, container):
@@ -28,8 +31,64 @@ def fill_template(container, src_dict, path=''):
     return container
 
 
+def change_indent_sign(indent, sign=' '):
+    return indent[:-2] + sign + ' '
+
+
+def display_complex_value(node, depth):
+    for key in node:
+        indent = depth * INDENT_MUL
+        if type(node[key]) == dict:
+            print("{}{}: {}".format(indent, key, '{'))
+            display_complex_value(node[key], depth + 1)
+            print("{}{}".format(indent, '}'))
+        else:
+            print(
+                "{}{}: {}".format(indent, key, node[key])
+            )
+
+
+def display_value(key, value, indent, depth):
+    if type(value) == dict:
+        print("{}{}: {}".format(indent, key, '{'))
+        display_complex_value(value, depth + 1)
+        indent = change_indent_sign(indent)
+        print("{}{}".format(indent, '}'))
+    else:
+        print(
+            "{}{}: {}".format(
+                indent,
+                key,
+                value
+            )
+        )
+
+
+def display_as_stylish(diff, depth=1):
+    for elem in diff:
+        indent = depth * INDENT_MUL
+        if elem.status == NESTED:
+            print("{}{}: {}".format(indent, elem.key, '{'))
+            display_as_stylish(elem.value, depth + 1)
+            print("{}{}".format(indent, '}'))
+        elif elem.status == ADDED or elem.status == REMOVED:
+            indent = change_indent_sign(indent, '-')
+            if elem.status == ADDED:
+                indent = change_indent_sign(indent, '+')
+            display_value(elem.key, elem.value, indent, depth)
+        elif elem.status == CHANGED:
+            indent = change_indent_sign(indent, '-')
+            display_value(elem.key, elem.value[0], indent, depth)
+            indent = change_indent_sign(indent, '+')
+            display_value(elem.key, elem.value[1], indent, depth)
+        else:
+            display_value(elem.key, elem.value, indent, depth)
+
+
 def make_stylish(diff):
-    pass
+    print('{')
+    display_as_stylish(diff)
+    print('}')
     # container = build_nested(diff.keys())
     # fill_template(container, diff)
     # print(json.dumps(container, sort_keys=True, indent=4))

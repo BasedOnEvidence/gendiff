@@ -1,28 +1,16 @@
 import json
 import os
-
 import yaml
+from operator import attrgetter
+from collections import namedtuple
 
+ADDED = "added"
+CHANGED = "changed"
+REMOVED = "removed"
+NESTED = "nested"
+SAME = "same"
 
-def gen_dict(current_dict, keys, status):
-    res_dict = {}
-    for key in current_dict:
-        if key in keys:
-            if current_dict[key] == ["KEY"]:
-                res_dict[key] = ["KEY", status]
-            else:
-                res_dict[key] = ["VALUE", current_dict[key], status]
-    return res_dict
-
-
-def gen_tuple_dict(first_file, second_file, keys, status):
-    res_dict = {}
-    for key in first_file:
-        if key in keys:
-            res_dict[key] = [
-                "VALUE", (first_file[key], second_file[key]), status
-            ]
-    return res_dict
+node = namedtuple("node", "key, status, value")
 
 
 def get_diff_keys(first_file, second_file):
@@ -53,39 +41,21 @@ def load_file(file_path):
     return file_
 
 
-def gen_depth_dict(src_dict, res_dict={}, path=''):
-    for elem_key in src_dict:
-        if type(src_dict[elem_key]) == dict:
-            res_dict[os.path.join(path, elem_key) + '/'] = ["KEY"]
-            gen_depth_dict(
-                src_dict[elem_key], res_dict, os.path.join(path, elem_key)
-            )
-        else:
-            res_dict[os.path.join(path, elem_key) + '/'] = src_dict[elem_key]
-    return res_dict
-
-
-def get_diff_on_next_layer(layer_diff, key, data1, data2, last_status=""):
+def get_diff_on_next_layer(layer_diff, key, data1, data2):
     if type(data1) == dict and type(data2) == dict:
         next_layer_diff = get_diff_on_current_layer(data1, data2)
         layer_diff.append(
-            {"key": key,
-             "status": "NESTED",
-             "value": next_layer_diff}
+            node(key, NESTED, next_layer_diff)
         )
     else:
         if data1 == data2:
             layer_diff.append(
-                {"key": key,
-                 "status": "SAME",
-                 "value": data2}
+                node(key, SAME, data2)
             )
         # Если сравнивать словарь-значение, то все равно changed
         if data1 != data2:
             layer_diff.append(
-                {"key": key,
-                 "status": "CHANGED",
-                 "value": (data1, data2)}
+                node(key, CHANGED, (data1, data2))
             )
 
 
@@ -98,16 +68,39 @@ def get_diff_on_current_layer(data1, data2):
         get_diff_on_next_layer(diff, key, data1[key], data2[key])
     # Если ключ не общий, то на уровнях ниже разницы не существует
     for key in added_keys:
-        diff.append({"key": key, "status": "ADDED", "value": data2[key]})
+        diff.append(node(key, ADDED, data2[key]))
     for key in removed_keys:
-        diff.append({"key": key, "status": "REMOVED", "value": data1[key]})
+        diff.append(node(key, REMOVED, data1[key]))
     return diff
+
+
+def sort_dict(node):
+    result = {}
+    for key, value in sorted(node.items()):
+        if type(value) == dict:
+            result[key] = sort_dict(value)
+        else:
+            result[key] = value
+    return result
+
+
+def sort_diff(node):
+    node.sort(key=attrgetter("key"))
+    for elem in node:
+        if type(elem.value) == list:
+            sort_diff(elem.value)
+        elif type(elem.value) == dict:
+            sort_dict(elem.value)
+        else:
+            pass
+    return node
 
 
 def generate_diff(file_path1, file_path2):
     first_data = load_file(file_path1)
     second_data = load_file(file_path2)
     diff = get_diff_on_current_layer(first_data, second_data)
+    diff = sort_diff(diff)
     # print(diff)
-    print(json.dumps(diff, sort_keys=True, indent=4))
+    # print(json.dumps(diff, indent=4))
     return diff
