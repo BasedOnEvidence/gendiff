@@ -183,7 +183,7 @@ testing = ["fields", "hunter", "process-tests (==2.0.2)", "six", "pytest-xdist",
 name = "pyyaml"
 version = "5.4.1"
 description = "YAML parser and emitter for Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -229,7 +229,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=1.2.3)", "pytest-flake8", "pyt
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.8"
-content-hash = "0b5e10ab71f3def0cfbdf05b642faa7946c93fb16c22c58859cd30f25ee7f212"
+content-hash = "c40ae7ebbbedafb230a9b832b72a421f71e8ca92cdb811f06122b12945f3a718"
 
 [metadata.files]
 atomicwrites = [
