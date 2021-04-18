@@ -1,9 +1,9 @@
 from gendiff.analyser import ADDED, CHANGED, REMOVED, NESTED
 
 
-ADDED_MSG = "Property {}{} was added with value: {}"
-REMOVED_MSG = "Property {}{} was removed."
-CHANGED_MSG = "Property {}{} was updated. From {} to {}"
+ADDED_MSG = "Property '{}{}' was added with value: {}"
+REMOVED_MSG = "Property '{}{}' was removed."
+CHANGED_MSG = "Property '{}{}' was updated. From {} to {}"
 
 
 def fix_output(value):
