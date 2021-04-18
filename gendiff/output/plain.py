@@ -49,4 +49,4 @@ def make_plain(diff, path=""):
                     fix_output(elem.value)
                 )
             )
-    return '\n'.join(lines)
+    return "\n".join(lines)
