@@ -96,7 +96,7 @@ def sort_diff(node):
     return node
 
 
-def generate_diff(file_path1, file_path2):
+def generate_temp_diff(file_path1, file_path2):
     first_data = load_file(file_path1)
     second_data = load_file(file_path2)
     diff = get_diff_on_current_layer(first_data, second_data)

@@ -1,4 +1,4 @@
-from gendiff.core import gendiff
+from gendiff.gendiff import generate_diff
 from gendiff.output.output_selector import (
     STYLISH_FORMAT, PLAIN_FORMAT, JSON_FORMAT
 )
@@ -29,21 +29,21 @@ def read(file_):
 
 def tests():
     assert read(EXPECTED_TEMP_DIFF) == (
-        gendiff(FULL_JSON1, FULL_JSON2, JSON_FORMAT)
+        generate_diff(FULL_JSON1, FULL_JSON2, JSON_FORMAT)
     )
     assert read(EXPECTED_TEMP_DIFF) == (
-        gendiff(FULL_YML1, FULL_YML2, JSON_FORMAT)
+        generate_diff(FULL_YML1, FULL_YML2, JSON_FORMAT)
     )
-    assert read(JSONDIFF1) == gendiff(JSON1, JSON2, STYLISH_FORMAT)
-    assert read(JSONDIFF1) == gendiff(YML1, YML2, STYLISH_FORMAT)
-    assert read(JSONDIFF1) == gendiff(YML1, JSON2, STYLISH_FORMAT)
-    assert "{\n}" == gendiff(BAD_YML, BAD_JSON, STYLISH_FORMAT)
+    assert read(JSONDIFF1) == generate_diff(JSON1, JSON2, STYLISH_FORMAT)
+    assert read(JSONDIFF1) == generate_diff(YML1, YML2, STYLISH_FORMAT)
+    assert read(JSONDIFF1) == generate_diff(YML1, JSON2, STYLISH_FORMAT)
+    assert "{\n}" == generate_diff(BAD_YML, BAD_JSON, STYLISH_FORMAT)
     assert read(EXPECTED_STYLISH) == (
-        gendiff(FULL_JSON1, FULL_JSON2, STYLISH_FORMAT)
+        generate_diff(FULL_JSON1, FULL_JSON2, STYLISH_FORMAT)
     )
     print(read(EXPECTED_STYLISH))
     assert read(EXPECTED_PLAIN) == (
-        gendiff(FULL_JSON1, FULL_JSON2, PLAIN_FORMAT)
+        generate_diff(FULL_JSON1, FULL_JSON2, PLAIN_FORMAT)
     )
 
 
