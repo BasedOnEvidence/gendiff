@@ -1,7 +1,7 @@
 from gendiff.analyser import ADDED, CHANGED, REMOVED, NESTED
 
 
-ADDED_MSG = "Property {}{} was added with value {}"
+ADDED_MSG = "Property {}{} was added with value: {}"
 REMOVED_MSG = "Property {}{} was removed."
 CHANGED_MSG = "Property {}{} was updated. From {} to {}"
 
@@ -13,8 +13,10 @@ def fix_output(value):
         return str(value).lower()
     elif value is None:
         return "null"
-    else:
+    elif type(value) == str:
         return "'{}'".format(value)
+    else:
+        return value
 
 
 def make_plain(diff, path=""):
