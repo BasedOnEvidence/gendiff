@@ -9,10 +9,7 @@
         },
         "setting6": {
             "key": "value",
-            "ops": "vops",
-            "doge": {
-                "wow": "so much"
-            }
+            "ops": "vops"
         }
     },
     "group1": {

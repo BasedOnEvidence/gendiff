@@ -7,6 +7,15 @@ def change_indent_sign(indent, sign=' '):
     return indent[:-2] + sign + ' '
 
 
+def fix_output(value):
+    if type(value) == bool:
+        return str(value).lower()
+    elif value is None:
+        return "null"
+    else:
+        return value
+
+
 def display_complex_value(node, lines, depth):
     for key in node:
         indent = depth * INDENT_MUL
@@ -16,7 +25,7 @@ def display_complex_value(node, lines, depth):
             lines.append("{}{}".format(indent, '}'))
         else:
             lines.append(
-                "{}{}: {}".format(indent, key, node[key])
+                "{}{}: {}".format(indent, key, fix_output(node[key]))
             )
 
 
@@ -31,7 +40,7 @@ def display_value(key, value, indent, lines, depth):
             "{}{}: {}".format(
                 indent,
                 key,
-                value
+                fix_output(value)
             )
         )
 

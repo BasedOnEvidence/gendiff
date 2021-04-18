@@ -1,11 +1,14 @@
 from gendiff.output import stylish, plain, json
 DEFAULT_FORMAT = "stylish"
+STYLISH_FORMAT = "stylish"
+PLAIN_FORMAT = "plain"
+JSON_FORMAT = "json"
 
 
 formats = {
-    "stylish": stylish.make_stylish,
-    "plain": plain.make_plain,
-    "json": json.make_json
+    STYLISH_FORMAT: stylish.make_stylish,
+    PLAIN_FORMAT: plain.make_plain,
+    JSON_FORMAT: json.make_json
 }
 
 
