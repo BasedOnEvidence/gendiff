@@ -7,6 +7,9 @@ build:
 package-install:
 	pip install --user dist/*.whl
 
+package-uninstall-0.1.0:
+	pip uninstall dist/hexlet_code-0.1.0-py3-none-any.whl
+
 lint:
 	poetry run flake8 gendiff
 
