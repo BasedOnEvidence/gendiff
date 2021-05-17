@@ -1,7 +1,7 @@
-from gendiff.gendiff import generate_diff
-from gendiff.output.output_selector import (
+from gendiff.constants import (
     STYLISH_FORMAT, PLAIN_FORMAT, JSON_FORMAT
 )
+from gendiff.gendiff import generate_diff
 
 
 # Paths

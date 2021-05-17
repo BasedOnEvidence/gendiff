@@ -1,4 +1,5 @@
 import argparse
+from gendiff.constants import STYLISH_FORMAT
 from gendiff.output import output_selector
 
 
@@ -9,6 +10,6 @@ def get_args_parser():
     parser.add_argument("-f",
                         "--format",
                         choices=output_selector.formats.keys(),
-                        default=output_selector.DEFAULT_FORMAT,
+                        default=STYLISH_FORMAT,
                         help="set format of output")
     return parser

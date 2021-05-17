@@ -1,4 +1,4 @@
-from gendiff.analyser import ADDED, CHANGED, REMOVED, NESTED
+from gendiff.constants import ADDED, CHANGED, REMOVED, NESTED
 
 
 ADDED_MSG = "Property '{}{}' was added with value: {}"

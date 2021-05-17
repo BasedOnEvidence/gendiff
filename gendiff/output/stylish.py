@@ -1,4 +1,5 @@
-from gendiff.analyser import ADDED, CHANGED, REMOVED, NESTED
+from gendiff.constants import ADDED, CHANGED, REMOVED, NESTED
+
 
 INDENT_MUL = ' ' * 4
 
