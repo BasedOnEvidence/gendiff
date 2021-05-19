@@ -2,6 +2,7 @@ from gendiff.constants import (
     STYLISH_FORMAT, PLAIN_FORMAT, JSON_FORMAT
 )
 from gendiff.gendiff import generate_diff
+import json
 
 
 # Paths
@@ -27,12 +28,18 @@ def read(file_):
     return answer
 
 
+def json_read(file_):
+    with open(file_, 'r') as input_file:
+        answer = json.load(input_file)
+    return answer
+
+
 def test_output():
-    assert read(EXPECTED_TEMP_DIFF) == (
-        generate_diff(FULL_JSON1, FULL_JSON2, JSON_FORMAT)
+    assert json_read(EXPECTED_TEMP_DIFF) == (
+        json.loads(generate_diff(FULL_JSON1, FULL_JSON2, JSON_FORMAT))
     )
-    assert read(EXPECTED_TEMP_DIFF) == (
-        generate_diff(FULL_YML1, FULL_YML2, JSON_FORMAT)
+    assert json_read(EXPECTED_TEMP_DIFF) == (
+        json.loads(generate_diff(FULL_YML1, FULL_YML2, JSON_FORMAT))
     )
     assert read(JSONDIFF1) == generate_diff(JSON1, JSON2, STYLISH_FORMAT)
     assert read(JSONDIFF1) == generate_diff(YML1, YML2, STYLISH_FORMAT)
