@@ -1,6 +1,6 @@
 import argparse
 from gendiff.constants import STYLISH_FORMAT
-from gendiff.output import output_selector
+from gendiff.output import formatters
 
 
 def get_args_parser():
@@ -9,7 +9,7 @@ def get_args_parser():
     parser.add_argument("second_file")
     parser.add_argument("-f",
                         "--format",
-                        choices=output_selector.formats.keys(),
+                        choices=formatters.formats.keys(),
                         default=STYLISH_FORMAT,
                         help="set format of output")
     return parser
