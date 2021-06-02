@@ -7,6 +7,3 @@ SAME = 'same'
 STYLISH_FORMAT = 'stylish'
 PLAIN_FORMAT = 'plain'
 JSON_FORMAT = 'json'
-
-DATA_OUTPUT_TEMPLATE = '{}{}: {}'
-END_OUTPUT_TEMPLATE = '{}{}'

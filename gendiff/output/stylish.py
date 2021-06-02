@@ -1,13 +1,11 @@
 from gendiff.constants import (
-    ADDED, CHANGED, REMOVED, NESTED, DATA_OUTPUT_TEMPLATE, END_OUTPUT_TEMPLATE
+    ADDED, CHANGED, REMOVED, NESTED
 )
 
+DATA_OUTPUT_TEMPLATE = '{}{}: {}'
+END_OUTPUT_TEMPLATE = '{}{}'
 
 INDENT_MUL = ' ' * 4
-
-
-def change_indent_sign(indent, sign=' '):
-    return indent[:-2] + sign + ' '
 
 
 def stringify(value):
@@ -32,20 +30,25 @@ def stringify_complex_value(node, lines, depth):
             )
 
 
-def display_value(key, value, indent, output, depth):
+def build_value(key, value, indent, sign, depth):
+    local_output = []
+    local_indent = indent[:-2] + sign + ' '
     if isinstance(value, dict):
-        output.append(DATA_OUTPUT_TEMPLATE.format(indent, key, '{'))
-        stringify_complex_value(value, output, depth + 1)
-        indent = change_indent_sign(indent)
-        output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
+        local_output.append(
+            DATA_OUTPUT_TEMPLATE.format(local_indent, key, '{')
+        )
+        stringify_complex_value(value, local_output, depth + 1)
+        local_indent = indent[:-2] + ' ' + ' '
+        local_output.append(END_OUTPUT_TEMPLATE.format(local_indent, '}'))
     else:
-        output.append(
+        local_output.append(
             DATA_OUTPUT_TEMPLATE.format(
-                indent,
+                local_indent,
                 key,
                 stringify(value)
             )
         )
+    return local_output
 
 
 def inner(diff, output, depth=1):
@@ -56,23 +59,30 @@ def inner(diff, output, depth=1):
             inner(elem.value, output, depth + 1)
             output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
         elif elem.status == ADDED:
-            indent = change_indent_sign(indent, '+')
-            display_value(elem.key, elem.value, indent, output, depth)
+            output.extend(
+                build_value(elem.key, elem.value, indent, '+', depth)
+            )
         elif elem.status == REMOVED:
-            indent = change_indent_sign(indent, '-')
-            display_value(elem.key, elem.value, indent, output, depth)
+            output.extend(
+                build_value(elem.key, elem.value, indent, '-', depth)
+            )
         elif elem.status == CHANGED:
-            indent = change_indent_sign(indent, '-')
-            display_value(elem.key, elem.value[0], indent, output, depth)
-            indent = change_indent_sign(indent, '+')
-            display_value(elem.key, elem.value[1], indent, output, depth)
+            output.extend(
+                build_value(elem.key, elem.value[0], indent, '-', depth)
+            )
+            output.extend(
+                build_value(elem.key, elem.value[1], indent, '+', depth)
+            )
         else:
-            display_value(elem.key, elem.value, indent, output, depth)
+            output.extend(
+                build_value(elem.key, elem.value, indent, ' ', depth)
+            )
+    return output
 
 
 def render(diff):
-    output = []
-    output.append('{')
-    inner(diff, output)
-    output.append('}')
-    return '\n'.join(output)
+    result = []
+    result.append('{')
+    result.extend(inner(diff, []))
+    result.append('}')
+    return '\n'.join(result)

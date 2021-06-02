@@ -19,12 +19,12 @@ def stringify(value):
         return value
 
 
-def render(diff, path=''):
+def inner(diff, path=''):
     lines = []
     for elem in diff:
         if elem.status == NESTED:
             lines.append(
-                render(elem.value, '{}{}.'.format(path, elem.key))
+                inner(elem.value, '{}{}.'.format(path, elem.key))
             )
         if elem.status == CHANGED:
             lines.append(
@@ -52,3 +52,7 @@ def render(diff, path=''):
                 )
             )
     return '\n'.join(lines)
+
+
+def render(diff):
+    return inner(diff)

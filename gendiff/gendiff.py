@@ -2,8 +2,9 @@ from operator import attrgetter
 from collections import namedtuple
 
 from gendiff.output.formatters import gen_output
-from gendiff.constants import ADDED, CHANGED, REMOVED, NESTED, SAME, \
-    STYLISH_FORMAT
+from gendiff.constants import (
+    ADDED, CHANGED, REMOVED, NESTED, SAME, STYLISH_FORMAT
+)
 from gendiff.loader import load_file
 
 Node = namedtuple('node', 'key, status, value')
@@ -15,7 +16,6 @@ def get_diff_on_next_layer(diff, key, data1, data2):
     else:
         if data1 == data2:
             diff.append(Node(key, SAME, data2))
-        # Если сравнивать словарь-значение, то все равно changed
         if data1 != data2:
             diff.append(Node(key, CHANGED, (data1, data2)))
 
@@ -25,7 +25,6 @@ def build_diff_tree(data1, data2):
     removed_keys = data1.keys() - data2.keys()
     shared_keys = data1.keys() & data2.keys()
     diff = []
-    # Если ключ не общий, то на уровнях ниже разницы не существует
     for key in added_keys:
         diff.append(Node(key, ADDED, data2[key]))
     for key in removed_keys:
