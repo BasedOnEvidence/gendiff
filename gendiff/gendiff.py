@@ -17,18 +17,15 @@ def insert_item(diff, keys, item, current_key):
 
 
 def build_diff_tree(data1, data2):  # noqa: C901
-    added_keys = data2.keys() - data1.keys()
-    removed_keys = data1.keys() - data2.keys()
-    shared_keys = data1.keys() & data2.keys()
     diff = []
     keys = []
-    for key in added_keys:
+    for key in (data2.keys() - data1.keys()):
         item = Node(key, ADDED, data2[key])
         insert_item(diff, keys, item, key)
-    for key in removed_keys:
+    for key in (data1.keys() - data2.keys()):
         item = Node(key, REMOVED, data1[key])
         insert_item(diff, keys, item, key)
-    for key in shared_keys:
+    for key in (data1.keys() & data2.keys()):
         if isinstance(data1[key], dict) and isinstance(data2[key], dict):
             item = Node(key, NESTED, build_diff_tree(data1[key], data2[key]))
             insert_item(diff, keys, item, key)
