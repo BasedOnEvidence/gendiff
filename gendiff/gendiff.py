@@ -1,4 +1,4 @@
-from operator import attrgetter
+import bisect
 from collections import namedtuple
 
 from gendiff.output.formatters import gen_output
@@ -10,28 +10,34 @@ from gendiff.loader import load_file
 Node = namedtuple('node', 'key, status, value')
 
 
-def get_diff_on_next_layer(diff, key, data1, data2):
-    if isinstance(data1, dict) and isinstance(data2, dict):
-        diff.append(Node(key, NESTED, build_diff_tree(data1, data2)))
-    else:
-        if data1 == data2:
-            diff.append(Node(key, SAME, data2))
-        if data1 != data2:
-            diff.append(Node(key, CHANGED, (data1, data2)))
+def insert_item(diff, keys, item, current_key):
+    insert_position = bisect.bisect_right(keys, current_key)
+    keys.insert(insert_position, current_key)
+    diff.insert(insert_position, item)
 
 
-def build_diff_tree(data1, data2):
+def build_diff_tree(data1, data2):  # noqa: C901
     added_keys = data2.keys() - data1.keys()
     removed_keys = data1.keys() - data2.keys()
     shared_keys = data1.keys() & data2.keys()
     diff = []
+    keys = []
     for key in added_keys:
-        diff.append(Node(key, ADDED, data2[key]))
+        item = Node(key, ADDED, data2[key])
+        insert_item(diff, keys, item, key)
     for key in removed_keys:
-        diff.append(Node(key, REMOVED, data1[key]))
+        item = Node(key, REMOVED, data1[key])
+        insert_item(diff, keys, item, key)
     for key in shared_keys:
-        get_diff_on_next_layer(diff, key, data1[key], data2[key])
-        diff.sort(key=attrgetter('key'))
+        if isinstance(data1[key], dict) and isinstance(data2[key], dict):
+            item = Node(key, NESTED, build_diff_tree(data1[key], data2[key]))
+            insert_item(diff, keys, item, key)
+        elif data1[key] == data2[key]:
+            item = Node(key, SAME, data2[key])
+            insert_item(diff, keys, item, key)
+        elif data1[key] != data2[key]:
+            item = Node(key, CHANGED, (data1[key], data2[key]))
+            insert_item(diff, keys, item, key)
     return diff
 
 

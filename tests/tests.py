@@ -22,23 +22,19 @@ FULL_YML1 = 'tests/fixtures/full-yml1.yml'
 FULL_YML2 = 'tests/fixtures/full-yml2.yml'
 
 
-def read(file_):
-    with open(file_, 'r') as input_file:
-        answer = input_file.read()
-    return answer
-
-
-def json_read(file_):
-    with open(file_, 'r') as input_file:
-        answer = json.load(input_file)
-    return answer
+def read(file_, as_json=False):
+    with open(file_, 'r') as fixture:
+        if as_json:
+            return json.load(fixture)
+        else:
+            return fixture.read()
 
 
 def test_output():
-    assert json_read(EXPECTED_TEMP_DIFF) == (
+    assert read(EXPECTED_TEMP_DIFF, as_json=True) == (
         json.loads(generate_diff(FULL_JSON1, FULL_JSON2, JSON_FORMAT))
     )
-    assert json_read(EXPECTED_TEMP_DIFF) == (
+    assert read(EXPECTED_TEMP_DIFF, as_json=True) == (
         json.loads(generate_diff(FULL_YML1, FULL_YML2, JSON_FORMAT))
     )
     assert read(JSONDIFF1) == generate_diff(JSON1, JSON2, STYLISH_FORMAT)
