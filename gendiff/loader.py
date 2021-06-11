@@ -24,9 +24,11 @@ def load_file(file_path):
                     unknown_format_detected = False
                     file_ = format.function(file_)
                 except format.error:
-                    print("Bad data in {}".format(file_path))
-                    file_ = {}
+                    raise ValueError("Bad data in {}".format(file_path))
     if unknown_format_detected:
-        print("Plese add .yml or .json to {}".format(file_path))
-        file_ = {}
+        raise TypeError(
+            "File {} have to be one of the folowing formats: {}".format(
+                file_path, [item.extension for item in formats]
+            )
+        )
     return file_

@@ -2,7 +2,9 @@ from gendiff.constants import (
     STYLISH_FORMAT, PLAIN_FORMAT, JSON_FORMAT
 )
 from gendiff.gendiff import generate_diff
+from gendiff.loader import load_file
 import json
+import pytest
 
 
 # Paths
@@ -11,6 +13,7 @@ JSON2 = 'tests/fixtures/json2.json'
 YML1 = 'tests/fixtures/yml1.yml'
 YML2 = 'tests/fixtures/yml2.yml'
 BAD_JSON = 'tests/fixtures/json'
+INCORRECT_JSON = 'tests/fixtures/incorrect-json.json'
 BAD_YML = 'tests/fixtures/yml.bak'
 JSONDIFF1 = 'tests/fixtures/jsondiff1.txt'
 EXPECTED_TEMP_DIFF = 'tests/fixtures/expected-json.json'
@@ -30,6 +33,13 @@ def read(file_, as_json=False):
             return fixture.read()
 
 
+def test_loader():
+    with pytest.raises(TypeError):
+        load_file(BAD_JSON)
+    with pytest.raises(ValueError):
+        load_file(INCORRECT_JSON)
+
+
 def test_output():
     assert read(EXPECTED_TEMP_DIFF, as_json=True) == (
         json.loads(generate_diff(FULL_JSON1, FULL_JSON2, JSON_FORMAT))
@@ -40,7 +50,6 @@ def test_output():
     assert read(JSONDIFF1) == generate_diff(JSON1, JSON2, STYLISH_FORMAT)
     assert read(JSONDIFF1) == generate_diff(YML1, YML2, STYLISH_FORMAT)
     assert read(JSONDIFF1) == generate_diff(YML1, JSON2, STYLISH_FORMAT)
-    assert '{\n}' == generate_diff(BAD_YML, BAD_JSON, STYLISH_FORMAT)
     assert read(EXPECTED_STYLISH) == generate_diff(
         FULL_JSON1, FULL_JSON2, STYLISH_FORMAT
     )
