@@ -16,7 +16,7 @@ def insert_item(diff, keys, item, current_key):
     diff.insert(insert_position, item)
 
 
-def build_diff_tree(data1, data2):  # noqa: C901
+def build_diff_tree(data1, data2):
     diff = []
     keys = []
     for key in (data2.keys() - data1.keys()):
@@ -32,7 +32,7 @@ def build_diff_tree(data1, data2):  # noqa: C901
         elif data1[key] == data2[key]:
             item = Node(key, SAME, data2[key])
             insert_item(diff, keys, item, key)
-        elif data1[key] != data2[key]:
+        else:
             item = Node(key, CHANGED, (data1[key], data2[key]))
             insert_item(diff, keys, item, key)
     return diff
