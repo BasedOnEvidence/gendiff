@@ -1,11 +1,6 @@
 from gendiff.constants import ADDED, CHANGED, REMOVED, NESTED
 
 
-ADDED_MSG = "Property '{}{}' was added with value: {}"
-REMOVED_MSG = "Property '{}{}' was removed"
-CHANGED_MSG = "Property '{}{}' was updated. From {} to {}"
-
-
 def stringify(value):
     if isinstance(value, dict):
         return '[complex value]'
@@ -28,7 +23,7 @@ def inner(diff, path=''):
             )
         if elem.status == CHANGED:
             lines.append(
-                CHANGED_MSG.format(
+                "Property '{}{}' was updated. From {} to {}".format(
                     path,
                     elem.key,
                     stringify(elem.value[0]),
@@ -37,7 +32,7 @@ def inner(diff, path=''):
             )
         if elem.status == ADDED:
             lines.append(
-                ADDED_MSG.format(
+                "Property '{}{}' was added with value: {}".format(
                     path,
                     elem.key,
                     stringify(elem.value)
@@ -45,10 +40,9 @@ def inner(diff, path=''):
             )
         if elem.status == REMOVED:
             lines.append(
-                REMOVED_MSG.format(
+                "Property '{}{}' was removed".format(
                     path,
-                    elem.key,
-                    stringify(elem.value)
+                    elem.key
                 )
             )
     return '\n'.join(lines)

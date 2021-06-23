@@ -19,7 +19,7 @@ def stringify(value):
 
 def stringify_complex_value(node, lines, depth):
     for key in node:
-        indent = depth * INDENT_MUL
+        indent = INDENT_MUL * depth
         if isinstance(node[key], dict):
             lines.append(DATA_OUTPUT_TEMPLATE.format(indent, key, '{'))
             stringify_complex_value(node[key], lines, depth + 1)
