@@ -30,61 +30,37 @@ def build_value(key, value, indent, sign):
     )
 
 
+def build_list(output, key, value, indent, depth, sign=' '):
+    if isinstance(value, dict):
+        output.append(build_value(key, '{', indent, sign))
+        inner(value, output, DICT, depth + 1)
+        output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
+    else:
+        output.append(
+            build_value(key, value, indent, sign)
+        )
+
+
 def inner(diff, output, status, depth=1):
+    indent = depth * INDENT_MUL
     for elem in diff:
         if status != DICT:
             status = elem.status
-        indent = depth * INDENT_MUL
         if status == NESTED:
-            output.append(DATA_OUTPUT_TEMPLATE.format(indent, elem.key, '{'))
+            output.append(build_value(elem.key, '{', indent, ' '))
             inner(elem.value, output, status, depth + 1)
             output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
         elif status == DICT:
-            if isinstance(diff[elem], dict):
-                output.append(DATA_OUTPUT_TEMPLATE.format(indent, elem, '{'))
-                inner(diff[elem], output, status, depth + 1)
-                output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
-            else:
-                output.append(
-                    build_value(elem, diff[elem], indent, ' ')
-                )
+            build_list(output, elem, diff[elem], indent, depth, ' ')
         elif status == ADDED:
-            if isinstance(elem.value, dict):
-                output.append(build_value(elem.key, '{', indent, '+'))
-                inner(elem.value, output, DICT, depth + 1)
-                output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
-            else:
-                output.append(
-                    build_value(elem.key, elem.value, indent, '+')
-                )
+            build_list(output, elem.key, elem.value, indent, depth, '+')
         elif status == REMOVED:
-            if isinstance(elem.value, dict):
-                output.append(build_value(elem.key, '{', indent, '-'))
-                inner(elem.value, output, DICT, depth + 1)
-                output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
-            else:
-                output.append(
-                    build_value(elem.key, elem.value, indent, '-')
-                )
+            build_list(output, elem.key, elem.value, indent, depth, '-')
         elif status == CHANGED:
-            if isinstance(elem.value[0], dict):
-                output.append(build_value(elem.key, '{', indent, '-'))
-                inner(elem.value[0], output, DICT, depth + 1)
-                output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
-            else:
-                output.append(
-                    build_value(elem.key, elem.value[0], indent, '-')
-                )
-            if isinstance(elem.value[1], dict):
-                output.append(build_value(elem.key, '{', indent, '+'))
-                inner(elem.value[1], output, DICT, depth + 1)
-                output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
-            else:
-                output.append(
-                    build_value(elem.key, elem.value[1], indent, '+')
-                )
+            build_list(output, elem.key, elem.value[0], indent, depth, '-')
+            build_list(output, elem.key, elem.value[1], indent, depth, '+')
         else:
-            output.append(build_value(elem.key, elem.value, indent, ' '))
+            build_list(output, elem.key, elem.value, indent, depth, ' ')
     return output
 
 
