@@ -30,10 +30,12 @@ def build_value(key, value, indent, sign):
     )
 
 
-def build_list(output, key, value, indent, depth, sign=' '):
+def build_list(output, key, value, indent, depth, sign=' ', status=' '):
     if isinstance(value, dict):
+        status = DICT
+    if isinstance(value, dict) or status == NESTED:
         output.append(build_value(key, '{', indent, sign))
-        inner(value, output, DICT, depth + 1)
+        inner(value, output, status, depth + 1)
         output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
     else:
         output.append(
@@ -47,11 +49,11 @@ def inner(diff, output, status, depth=1):
         if status != DICT:
             status = elem.status
         if status == NESTED:
-            output.append(build_value(elem.key, '{', indent, ' '))
-            inner(elem.value, output, status, depth + 1)
-            output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
+            build_list(
+                output, elem.key, elem.value, indent, depth, ' ', status
+            )
         elif status == DICT:
-            build_list(output, elem, diff[elem], indent, depth, ' ')
+            build_list(output, elem, diff[elem], indent, depth, ' ', status)
         elif status == ADDED:
             build_list(output, elem.key, elem.value, indent, depth, '+')
         elif status == REMOVED:
