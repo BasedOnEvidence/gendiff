@@ -43,7 +43,7 @@ def build_list(output, key, value, indent, depth, sign=' ', status=' '):
         )
 
 
-def inner(diff, output, status, depth=1):
+def inner(diff, output, status, depth=1):  # noqa: C901
     indent = depth * INDENT_MUL
     for elem in diff:
         if status != DICT:
