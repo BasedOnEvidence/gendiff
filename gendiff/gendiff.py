@@ -35,6 +35,4 @@ def generate_diff(
 ):
     first_data = load_file(first_file)
     second_data = load_file(second_file)
-    diff = build_diff_tree(first_data, second_data)
-    diff = gen_output(diff, style)
-    return diff
+    return gen_output(build_diff_tree(first_data, second_data), style)

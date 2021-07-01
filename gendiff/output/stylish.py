@@ -1,75 +1,80 @@
+from collections import namedtuple
+
 from gendiff.constants import (
-    ADDED, CHANGED, REMOVED, NESTED
+    ADDED, CHANGED, REMOVED, NESTED, SAME
 )
 
-DICT = 'dict'
 
 DATA_OUTPUT_TEMPLATE = '{}{}: {}'
 END_OUTPUT_TEMPLATE = '{}{}'
 
-INDENT_MUL = ' ' * 4
+INDENT = ' ' * 2
 
 
-def stringify(value):
+def strignify(value):
+    # Node = namedtuple('node', 'key, status, value')
     if isinstance(value, bool):
         return str(value).lower()
     elif value is None:
         return 'null'
-    else:
-        return value
+    return value
 
 
-def build_value(key, value, indent, sign):
-    local_indent = indent[:-2] + sign + ' '
-    return (
-        DATA_OUTPUT_TEMPLATE.format(
-            local_indent,
-            key,
-            stringify(value)
-        )
-    )
-
-
-def build_list(output, key, value, indent, depth, sign=' ', status=' '):
+def convert(value):
     if isinstance(value, dict):
-        status = DICT
-    if isinstance(value, dict) or status == NESTED:
-        output.append(build_value(key, '{', indent, sign))
-        inner(value, output, status, depth + 1)
-        output.append(END_OUTPUT_TEMPLATE.format(indent, '}'))
-    else:
-        output.append(
-            build_value(key, value, indent, sign)
-        )
+        Node = namedtuple('node', 'key, status, value')
+        structure = []
+        for key, val in value.items():
+            structure.append(Node(key, SAME, val))
+        return structure
+    return value
 
 
-def inner(diff, output, status, depth=1):  # noqa: C901
-    indent = depth * INDENT_MUL
+def inner(diff, indent=INDENT, output=[]):  # noqa: C901
     for elem in diff:
-        if status != DICT:
-            status = elem.status
-        if status == NESTED:
-            build_list(
-                output, elem.key, elem.value, indent, depth, ' ', status
-            )
-        elif status == DICT:
-            build_list(output, elem, diff[elem], indent, depth, ' ', status)
-        elif status == ADDED:
-            build_list(output, elem.key, elem.value, indent, depth, '+')
-        elif status == REMOVED:
-            build_list(output, elem.key, elem.value, indent, depth, '-')
-        elif status == CHANGED:
-            build_list(output, elem.key, elem.value[0], indent, depth, '-')
-            build_list(output, elem.key, elem.value[1], indent, depth, '+')
+        if elem.status == NESTED:
+            output.append('{}{} {}: {}'.format(indent, ' ', elem.key, '{'))
+            inner(convert(elem.value), indent + 4 * ' ')
+            output.append('{}  {}'.format(indent, '}'))
         else:
-            build_list(output, elem.key, elem.value, indent, depth, ' ')
+            if elem.status == CHANGED:
+                if isinstance(elem.value[0], dict):
+                    output.append(
+                        '{}{} {}: {}'.format(indent, '-', elem.key, '{')
+                    )
+                    inner(convert(elem.value[0]), indent + 4 * ' ')
+                    output.append('{}  {}'.format(indent, '}'))
+                else:
+                    output.append('{}{} {}: {}'.format(
+                        indent, '-', elem.key, strignify(elem.value[0])
+                    ))
+                if isinstance(elem.value[1], dict):
+                    output.append(
+                        '{}{} {}: {}'.format(indent, '+', elem.key, '{')
+                    )
+                    inner(convert(elem.value[1]), indent + 4 * ' ')
+                    output.append('{}  {}'.format(indent, '}'))
+                else:
+                    output.append('{}{} {}: {}'.format(
+                        indent, '+', elem.key, strignify(elem.value[1])
+                    ))
+            else:
+                sign = {ADDED: '+', REMOVED: '-', SAME: ' '}[elem.status]
+                if isinstance(elem.value, dict):
+                    output.append(
+                        '{}{} {}: {}'.format(indent, sign, elem.key, '{')
+                    )
+                    inner(convert(elem.value), indent + 4 * ' ')
+                    output.append('{}  {}'.format(indent, '}'))
+                else:
+                    output.append('{}{} {}: {}'.format(
+                        indent, sign, elem.key, strignify(elem.value)
+                    ))
     return output
 
 
 def render(diff):
-    result = []
-    result.append('{')
-    status = diff[0].status
-    result.extend(inner(diff, [], status))
-    result.append('}')
-    return '\n'.join(result)
+    lst = inner(diff)
+    result = '\n'.join(lst)
+    lst.clear()
+    return '\n'.join(['{', result, '}'])
