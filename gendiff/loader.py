@@ -5,7 +5,7 @@ from gendiff.structures import formats
 
 
 def get_data_from(file_path):
-    extension = os.path.splitext(file_path)[1]
+    extension = os.path.splitext(file_path)[-1]
     parser(extension)
     load_func, err = formats[extension]
     with open(file_path, 'r') as file_:
