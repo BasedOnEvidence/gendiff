@@ -1,13 +1,11 @@
-from collections import namedtuple
 from operator import attrgetter
 
 from gendiff.output.formatters import gen_output
 from gendiff.constants import (
     ADDED, CHANGED, REMOVED, NESTED, SAME, STYLISH_FORMAT
 )
-from gendiff.loader import load_file
-
-Node = namedtuple('node', 'key, status, value')
+from gendiff.loader import get_data_from
+from gendiff.structures import Node
 
 
 def build_diff_tree(data1, data2):
@@ -33,6 +31,6 @@ def generate_diff(
     first_file, second_file,
     style=STYLISH_FORMAT
 ):
-    first_data = load_file(first_file)
-    second_data = load_file(second_file)
+    first_data = get_data_from(first_file)
+    second_data = get_data_from(second_file)
     return gen_output(build_diff_tree(first_data, second_data), style)

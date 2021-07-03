@@ -1,18 +1,12 @@
-from collections import namedtuple
-
 from gendiff.constants import (
     ADDED, CHANGED, REMOVED, NESTED, SAME
 )
-
-
-DATA_OUTPUT_TEMPLATE = '{}{}: {}'
-END_OUTPUT_TEMPLATE = '{}{}'
+from gendiff.structures import Node
 
 INDENT = ' ' * 2
 
 
 def strignify(value):
-    # Node = namedtuple('node', 'key, status, value')
     if isinstance(value, bool):
         return str(value).lower()
     elif value is None:
@@ -20,61 +14,41 @@ def strignify(value):
     return value
 
 
-def convert(value):
+def dict_to_nodes(value):
+    structure = value
     if isinstance(value, dict):
-        Node = namedtuple('node', 'key, status, value')
-        structure = []
-        for key, val in value.items():
-            structure.append(Node(key, SAME, val))
-        return structure
-    return value
+        structure = [Node(key, SAME, val) for key, val in value.items()]
+    return structure
 
 
-def inner(diff, indent=INDENT, output=[]):  # noqa: C901
+def inner(diff, indent=INDENT):
+    output = []
     for elem in diff:
-        if elem.status == NESTED:
-            output.append('{}{} {}: {}'.format(indent, ' ', elem.key, '{'))
-            inner(convert(elem.value), indent + 4 * ' ')
-            output.append('{}  {}'.format(indent, '}'))
+        if elem.status == CHANGED:
+            output.append(
+                inner([Node(elem.key, REMOVED, elem.value[0])], indent)
+            )
+            output.append(
+                inner([Node(elem.key, ADDED, elem.value[1])], indent)
+            )
         else:
-            if elem.status == CHANGED:
-                if isinstance(elem.value[0], dict):
-                    output.append(
-                        '{}{} {}: {}'.format(indent, '-', elem.key, '{')
-                    )
-                    inner(convert(elem.value[0]), indent + 4 * ' ')
-                    output.append('{}  {}'.format(indent, '}'))
-                else:
-                    output.append('{}{} {}: {}'.format(
-                        indent, '-', elem.key, strignify(elem.value[0])
-                    ))
-                if isinstance(elem.value[1], dict):
-                    output.append(
-                        '{}{} {}: {}'.format(indent, '+', elem.key, '{')
-                    )
-                    inner(convert(elem.value[1]), indent + 4 * ' ')
-                    output.append('{}  {}'.format(indent, '}'))
-                else:
-                    output.append('{}{} {}: {}'.format(
-                        indent, '+', elem.key, strignify(elem.value[1])
-                    ))
+            sign = {
+                ADDED: '+', REMOVED: '-', SAME: ' ', NESTED: ' '
+            }[elem.status]
+            if isinstance(elem.value, dict) or elem.status == NESTED:
+                output.append(
+                    '{}{} {}: {}'.format(indent, sign, elem.key, '{')
+                )
+                output.append(
+                    inner(dict_to_nodes(elem.value), indent + 4 * ' ')
+                )
+                output.append('{}  {}'.format(indent, '}'))
             else:
-                sign = {ADDED: '+', REMOVED: '-', SAME: ' '}[elem.status]
-                if isinstance(elem.value, dict):
-                    output.append(
-                        '{}{} {}: {}'.format(indent, sign, elem.key, '{')
-                    )
-                    inner(convert(elem.value), indent + 4 * ' ')
-                    output.append('{}  {}'.format(indent, '}'))
-                else:
-                    output.append('{}{} {}: {}'.format(
-                        indent, sign, elem.key, strignify(elem.value)
-                    ))
-    return output
+                output.append('{}{} {}: {}'.format(
+                    indent, sign, elem.key, strignify(elem.value)
+                ))
+    return '\n'.join(output)
 
 
 def render(diff):
-    lst = inner(diff)
-    result = '\n'.join(lst)
-    lst.clear()
-    return '\n'.join(['{', result, '}'])
+    return '{\n' + inner(diff) + '\n}'
