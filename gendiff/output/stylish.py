@@ -23,9 +23,7 @@ def strignify_complex_value(key, value, sign, indent):
     output.append(
         '{}{} {}: {}'.format(indent, sign, key, '{')
     )
-    output.append(
-        inner(value, indent + 4 * ' ')
-    )
+    output.append(value)
     output.append('{}  {}'.format(indent, '}'))
     return '\n'.join(output)
 
@@ -45,12 +43,14 @@ def inner(diff, indent=INDENT):
                 ADDED: '+', REMOVED: '-', SAME: ' ', NESTED: ' '
             }[elem.status]
             if isinstance(elem.value, dict):
+                value = inner(dict_to_nodes(elem.value), indent + 4 * ' ')
                 output.append(strignify_complex_value(
-                    elem.key, dict_to_nodes(elem.value), sign, indent
+                    elem.key, value, sign, indent
                 ))
             elif elem.status == NESTED:
+                value = inner(elem.value, indent + 4 * ' ')
                 output.append(strignify_complex_value(
-                    elem.key, elem.value, sign, indent
+                    elem.key, value, sign, indent
                 ))
             else:
                 output.append('{}{} {}: {}'.format(
