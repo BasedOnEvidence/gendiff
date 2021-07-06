@@ -19,8 +19,8 @@ def dict_to_nodes(value):
 
 
 def strignify_complex_value(key, value, sign, indent):
-    return '{}{} {}: {}\n{}\n{}  {}'.format(
-        indent, sign, key, '{', value, indent, '}'
+    return '{}{} {}: {{\n{}\n{}  }}'.format(
+        indent, sign, key, value, indent
     )
 
 
@@ -34,17 +34,17 @@ def inner(diff, indent=INDENT):
             output.append(
                 inner([Node(elem.key, ADDED, elem.value[1])], indent)
             )
+        elif elem.status == NESTED:
+            value = inner(elem.value, indent + 4 * ' ')
+            output.append(strignify_complex_value(
+                elem.key, value, ' ', indent
+            ))
         else:
             sign = {
-                ADDED: '+', REMOVED: '-', SAME: ' ', NESTED: ' '
+                ADDED: '+', REMOVED: '-', SAME: ' '
             }[elem.status]
             if isinstance(elem.value, dict):
                 value = inner(dict_to_nodes(elem.value), indent + 4 * ' ')
-                output.append(strignify_complex_value(
-                    elem.key, value, sign, indent
-                ))
-            elif elem.status == NESTED:
-                value = inner(elem.value, indent + 4 * ' ')
                 output.append(strignify_complex_value(
                     elem.key, value, sign, indent
                 ))
