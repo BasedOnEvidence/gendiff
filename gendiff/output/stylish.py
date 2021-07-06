@@ -15,10 +15,9 @@ def strignify(value):
 
 
 def dict_to_nodes(value):
-    structure = value
     if isinstance(value, dict):
-        structure = [Node(key, SAME, val) for key, val in value.items()]
-    return structure
+        return [Node(key, SAME, val) for key, val in value.items()]
+    return value
 
 
 def inner(diff, indent=INDENT):
