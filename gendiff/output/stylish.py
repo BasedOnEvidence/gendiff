@@ -19,13 +19,9 @@ def dict_to_nodes(value):
 
 
 def strignify_complex_value(key, value, sign, indent):
-    output = []
-    output.append(
-        '{}{} {}: {}'.format(indent, sign, key, '{')
+    return '{}{} {}: {}\n{}\n{}  {}'.format(
+        indent, sign, key, '{', value, indent, '}'
     )
-    output.append(value)
-    output.append('{}  {}'.format(indent, '}'))
-    return '\n'.join(output)
 
 
 def inner(diff, indent=INDENT):
