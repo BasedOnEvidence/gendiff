@@ -6,12 +6,14 @@ from gendiff.structures import Node
 INDENT = ' ' * 2
 
 
-def strignify(value):
+def strignify(key, value, sign, indent):
     if isinstance(value, bool):
-        return str(value).lower()
+        value = str(value).lower()
     elif value is None:
-        return 'null'
-    return value
+        value = 'null'
+    return ('{}{} {}: {}'.format(
+        indent, sign, key, value
+    ))
 
 
 def dict_to_nodes(value):
@@ -49,8 +51,8 @@ def inner(diff, indent=INDENT):
                     elem.key, value, sign, indent
                 ))
             else:
-                output.append('{}{} {}: {}'.format(
-                    indent, sign, elem.key, strignify(elem.value)
+                output.append(strignify(
+                    elem.key, elem.value, sign, indent
                 ))
     return '\n'.join(output)
 
