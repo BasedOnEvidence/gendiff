@@ -1,13 +1,11 @@
 import json
 import yaml
 
-from json.decoder import JSONDecodeError
-from yaml.error import YAMLError
 
 formats = {
-    '.json': [json.loads, JSONDecodeError],
-    '.yml': [yaml.safe_load, YAMLError],
-    '.yaml': [yaml.safe_load, YAMLError]
+    '.json': json.loads,
+    '.yml': yaml.safe_load,
+    '.yaml': yaml.safe_load
 }
 
 
@@ -18,5 +16,5 @@ def parser(data, extension):
                 formats.keys()
             )
         )
-    load_func, _ = formats[extension]
+    load_func = formats[extension]
     return load_func(data)
