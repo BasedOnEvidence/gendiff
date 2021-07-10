@@ -6,7 +6,7 @@ from gendiff.structures import Node
 INDENT = ' ' * 2
 
 
-def strignify(key, value, sign, indent):
+def gen_output_line(key, value, sign, indent):
     if isinstance(value, bool):
         value = str(value).lower()
     elif value is None:
@@ -16,14 +16,14 @@ def strignify(key, value, sign, indent):
     ))
 
 
-def dict_to_nodes(value):
-    return [Node(key, SAME, val) for key, val in value.items()]
-
-
-def strignify_complex_value(key, value, sign, indent):
+def gen_complex_output_line(key, value, sign, indent):
     return '{}{} {}: {{\n{}\n{}  }}'.format(
         indent, sign, key, value, indent
     )
+
+
+def dict_to_nodes(value):
+    return [Node(key, SAME, val) for key, val in value.items()]
 
 
 def inner(diff, indent=INDENT):
@@ -38,7 +38,7 @@ def inner(diff, indent=INDENT):
             )
         elif elem.status == NESTED:
             value = inner(elem.value, indent + ' ' * 4)
-            output.append(strignify_complex_value(
+            output.append(gen_complex_output_line(
                 elem.key, value, ' ', indent
             ))
         else:
@@ -47,11 +47,11 @@ def inner(diff, indent=INDENT):
             }[elem.status]
             if isinstance(elem.value, dict):
                 value = inner(dict_to_nodes(elem.value), indent + ' ' * 4)
-                output.append(strignify_complex_value(
+                output.append(gen_complex_output_line(
                     elem.key, value, sign, indent
                 ))
             else:
-                output.append(strignify(
+                output.append(gen_output_line(
                     elem.key, elem.value, sign, indent
                 ))
     return '\n'.join(output)
