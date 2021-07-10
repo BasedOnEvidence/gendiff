@@ -15,7 +15,7 @@ formats = {
 def parser(data, extension):
     if extension not in formats.keys():
         raise TypeError(
-            "File have to be one of the folowing formats: {}".format(
+            'Bad format. The following formats are supported: {}'.format(
                 formats.keys()
             )
         )
