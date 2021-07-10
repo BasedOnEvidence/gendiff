@@ -18,7 +18,7 @@ def read(file_name):
 
 
 @pytest.mark.parametrize('extension', ['json', 'yml'])
-def test_json_load_errors(extension):
+def test_load_errors(extension):
     BAD_EXT = get_resource_path('bad-{}-ext'.format(extension))
     BAD_DATA = get_resource_path('incorrect-{0}.{0}'.format(extension))
     with pytest.raises(TypeError):
