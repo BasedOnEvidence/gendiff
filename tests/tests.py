@@ -17,13 +17,14 @@ def read(file_name):
         return fixture.read()
 
 
-def test_json_load_errors():
-    BAD_JSON_EXT = get_resource_path('bad-json-ext')
-    BAD_JSON_DATA = get_resource_path('incorrect-json.json')
+@pytest.mark.parametrize('extension', ['json', 'yml'])
+def test_json_load_errors(extension):
+    BAD_EXT = get_resource_path('bad-{}-ext'.format(extension))
+    BAD_DATA = get_resource_path('incorrect-{0}.{0}'.format(extension))
     with pytest.raises(TypeError):
-        get_data_from(BAD_JSON_EXT)
+        get_data_from(BAD_EXT)
     with pytest.raises(ValueError):
-        get_data_from(BAD_JSON_DATA)
+        get_data_from(BAD_DATA)
 
 
 @pytest.mark.parametrize('extension', ['json', 'yml'])

@@ -9,4 +9,4 @@ def get_data_from(file_path):
         try:
             return parser(file_.read(), extension)
         except ValueError as err:
-            raise ValueError("Bad data in {}".format(file_path)) from err
+            raise ValueError('Bad data in {}'.format(file_path)) from err
