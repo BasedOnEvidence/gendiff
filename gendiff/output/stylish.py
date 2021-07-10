@@ -37,7 +37,7 @@ def inner(diff, indent=INDENT):
                 inner([Node(elem.key, ADDED, elem.value[1])], indent)
             )
         elif elem.status == NESTED:
-            value = inner(elem.value, indent + 4 * ' ')
+            value = inner(elem.value, indent + ' ' * 4)
             output.append(strignify_complex_value(
                 elem.key, value, ' ', indent
             ))
@@ -46,7 +46,7 @@ def inner(diff, indent=INDENT):
                 ADDED: '+', REMOVED: '-', SAME: ' '
             }[elem.status]
             if isinstance(elem.value, dict):
-                value = inner(dict_to_nodes(elem.value), indent + 4 * ' ')
+                value = inner(dict_to_nodes(elem.value), indent + ' ' * 4)
                 output.append(strignify_complex_value(
                     elem.key, value, sign, indent
                 ))

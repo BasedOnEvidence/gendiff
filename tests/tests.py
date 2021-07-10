@@ -26,32 +26,21 @@ def test_json_load_errors():
         get_data_from(BAD_JSON_DATA)
 
 
-def test_output():
-    JSON1 = get_resource_path('json1.json')
-    JSON2 = get_resource_path('json2.json')
-    YML1 = get_resource_path('yml1.yml')
-    YML2 = get_resource_path('yml2.yml')
-    FULL_JSON1 = get_resource_path('full-json1.json')
-    FULL_JSON2 = get_resource_path('full-json2.json')
-    FULL_YML1 = get_resource_path('full-yml1.yml')
-    FULL_YML2 = get_resource_path('full-yml2.yml')
-    assert json.loads(read('expected-json.json')) == (
-        json.loads(generate_diff(FULL_JSON1, FULL_JSON2, JSON_FORMAT))
-    )
-    assert json.loads(read('expected-json.json')) == (
-        json.loads(generate_diff(FULL_YML1, FULL_YML2, JSON_FORMAT))
-    )
-    assert read('jsondiff.txt') == (
-        generate_diff(JSON1, JSON2, STYLISH_FORMAT)
-    )
-    assert read('jsondiff.txt') == (generate_diff(YML1, YML2, STYLISH_FORMAT))
-    assert read('jsondiff.txt') == (generate_diff(YML1, JSON2, STYLISH_FORMAT))
-    assert read('expected-stylish.txt') == generate_diff(
-        FULL_JSON1, FULL_JSON2, STYLISH_FORMAT
+@pytest.mark.parametrize('extension', ['json', 'yml'])
+def test_output(extension):
+    SIMPLE_DATA1 = get_resource_path('{0}1.{0}'.format(extension))
+    SIMPLE_DATA2 = get_resource_path('{0}2.{0}'.format(extension))
+    COMPLEX_DATA1 = get_resource_path('full-{0}1.{0}'.format(extension))
+    COMPLEX_DATA2 = get_resource_path('full-{0}2.{0}'.format(extension))
+    assert read('jsondiff.txt') == generate_diff(
+        SIMPLE_DATA1, SIMPLE_DATA2
     )
     assert read('expected-stylish.txt') == generate_diff(
-        FULL_JSON1, FULL_JSON2
+        COMPLEX_DATA1, COMPLEX_DATA2, STYLISH_FORMAT
     )
     assert read('expected-plain.txt') == generate_diff(
-        FULL_JSON1, FULL_JSON2, PLAIN_FORMAT
+        COMPLEX_DATA1, COMPLEX_DATA2, PLAIN_FORMAT
+    )
+    assert json.loads(read('expected-json.json')) == (
+        json.loads(generate_diff(COMPLEX_DATA1, COMPLEX_DATA2, JSON_FORMAT))
     )
